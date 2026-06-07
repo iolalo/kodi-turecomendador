@@ -27,10 +27,12 @@ EXCLUDE_DIRS = {
     "logfiles",
 }
 
-# Archivos con credenciales personales que no deben distribuirse
+# Archivos con credenciales personales o específicos de plataforma que no deben distribuirse
 EXCLUDE_FILES = {
     # tokens Trakt y API keys del addon
     os.path.join("userdata", "addon_data", "plugin.video.turecomendador", "settings.xml"),
+    # configuración de audio/video/display — específica de cada dispositivo
+    os.path.join("userdata", "guisettings.xml"),
 }
 
 EXCLUDE_EXTS = {".pyc", ".pyo", ".log", ".bak"}
@@ -53,7 +55,7 @@ def main():
         print(f"ERROR: no se encontró Kodi en {KODI_HOME}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Empaquetando {KODI_HOME} → {OUTPUT}")
+    print(f"Empaquetando {KODI_HOME} -> {OUTPUT}")
     count = 0
     skipped = 0
 
