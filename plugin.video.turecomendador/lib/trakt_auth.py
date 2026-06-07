@@ -29,10 +29,15 @@ def _save_token(token_data: dict):
 
 
 def _load_token() -> dict | None:
-    if not os.path.exists(_token_file()):
+    path = _token_file()
+    if not os.path.exists(path):
         return None
-    with open(_token_file()) as f:
-        return json.load(f)
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        os.remove(path)
+        return None
 
 
 def _refresh_token(token_data: dict) -> dict | None:

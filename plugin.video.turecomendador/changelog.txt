@@ -1,3 +1,9 @@
+v0.4.2 (2026-06-07)
+- Fix: trakt_token.json corrupto ya no crashea el addon (try/except + auto-borrado)
+- Fix: caché en memoria de TMDB limitado a 200 entradas (LRU) para no agotar RAM en ARM
+- Fix: stats_window detecta resolución de pantalla para elegir 720p o 1080p
+- Fix: wizard apunta a tag fijo build-20260607 en vez de releases/latest (evitaba 404)
+
 v0.4.1 (2026-06-07)
 - Fix: dependencia de Elementum marcada como opcional para permitir instalación sin él
 

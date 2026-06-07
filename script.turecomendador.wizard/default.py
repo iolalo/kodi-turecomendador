@@ -6,7 +6,8 @@ import xbmcgui
 import xbmcvfs
 
 GITHUB_REPO = "iolalo/kodi-turecomendador"
-BUILD_URL = f"https://github.com/{GITHUB_REPO}/releases/latest/download/kodi-build.zip"
+BUILD_TAG = "build-20260607"
+BUILD_URL = f"https://github.com/{GITHUB_REPO}/releases/download/{BUILD_TAG}/kodi-build.zip"
 
 
 def _kodi_home():

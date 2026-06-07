@@ -1,6 +1,7 @@
 from __future__ import annotations
 import time
 import requests
+from collections import OrderedDict
 from lib.config import TMDB_API_KEY
 
 BASE_URL = "https://api.themoviedb.org/3"
@@ -16,10 +17,10 @@ except ImportError:
     def _log(msg: str):
         print(f"[WARN] {msg}")
 
-# Caché en memoria con TTL de 6 horas — evita re-llamar a /similar y /details
-_mem_cache: dict = {}
+_mem_cache: OrderedDict = OrderedDict()
 _mem_cache_ts: dict = {}
 MEMORY_CACHE_TTL = 6 * 3600
+MEMORY_CACHE_MAX = 200
 
 
 def _kodi_language() -> str:
@@ -64,11 +65,16 @@ def _get(endpoint: str, params: dict = None) -> dict | list | None:
 def _cached_get(cache_key: str, endpoint: str, params: dict = None) -> dict | list | None:
     now = time.time()
     if cache_key in _mem_cache and now - _mem_cache_ts.get(cache_key, 0) < MEMORY_CACHE_TTL:
+        _mem_cache.move_to_end(cache_key)
         return _mem_cache[cache_key]
     result = _get(endpoint, params)
     if result is not None:
         _mem_cache[cache_key] = result
         _mem_cache_ts[cache_key] = now
+        if len(_mem_cache) > MEMORY_CACHE_MAX:
+            oldest = next(iter(_mem_cache))
+            del _mem_cache[oldest]
+            _mem_cache_ts.pop(oldest, None)
     return result
 
 

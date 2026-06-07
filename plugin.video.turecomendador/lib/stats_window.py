@@ -263,8 +263,15 @@ class StatsDialog(xbmcgui.WindowXML):
             self.close()
 
 
+def _skin_res() -> str:
+    try:
+        return "1080p" if xbmcgui.getScreenResolution() >= 6 else "720p"
+    except Exception:
+        return "720p"
+
+
 def show_stats_window(stats_data: dict, period_label: str, is_all_time: bool = False):
-    dialog = StatsDialog("DialogStats.xml", ADDON_PATH, "Default", "720p")
+    dialog = StatsDialog("DialogStats.xml", ADDON_PATH, "Default", _skin_res())
     dialog.stats_data = stats_data
     dialog.period_label = period_label
     dialog.is_all_time = is_all_time
