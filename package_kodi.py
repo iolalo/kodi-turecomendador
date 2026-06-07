@@ -23,6 +23,7 @@ EXCLUDE_ADDONS = {
     "script.elementum.burst",    # depende de elementum
     "repository.elementumorg",   # repo de elementum
     "vfs.libarchive",            # binario nativo dependiente de plataforma
+    "repository.addons4kodi",    # schema checksum sin algo= crashea Kodi 21
 }
 
 # Carpetas que no tienen sentido copiar
