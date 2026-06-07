@@ -19,11 +19,14 @@ OUTPUT = Path("kodi-build.zip")
 # Addons con binarios nativos x86/x64 que no corren en ARM (LibreELEC/Raspberry Pi)
 # El usuario los instala desde su repo oficial directamente en el dispositivo destino
 EXCLUDE_ADDONS = {
-    "plugin.video.elementum",    # binario nativo: elementum.exe / elementum (arm)
-    "script.elementum.burst",    # depende de elementum
-    "repository.elementumorg",   # repo de elementum
-    "vfs.libarchive",            # binario nativo dependiente de plataforma
+    "vfs.libarchive",            # binario nativo Windows, built-in en LibreELEC
     "repository.addons4kodi",    # schema checksum sin algo= crashea Kodi 21
+}
+
+# Subdirectorios dentro de addons a excluir (binarios nativos de plataforma)
+EXCLUDE_ADDON_SUBDIRS = {
+    # Elementum se incluye sin el binario — auto-descarga el correcto al ejecutarse
+    os.path.join("plugin.video.elementum", "resources", "bin"),
 }
 
 # Carpetas que no tienen sentido copiar
@@ -53,9 +56,15 @@ def should_exclude(rel: str) -> bool:
     for part in parts:
         if part in EXCLUDE_DIRS:
             return True
-    # Excluir addons con binarios nativos platform-específicos
+    # Excluir addons completos incompatibles
     if parts[0] == "addons" and len(parts) > 1 and parts[1] in EXCLUDE_ADDONS:
         return True
+    # Excluir subdirectorios específicos dentro de addons (ej: binarios de Elementum)
+    for subdir in EXCLUDE_ADDON_SUBDIRS:
+        if rel.startswith(os.path.join("addons", subdir).replace("\\", "/")):
+            return True
+        if rel.replace("/", os.sep).startswith(os.path.join("addons", subdir)):
+            return True
     if rel in EXCLUDE_FILES:
         return True
     if Path(rel).suffix in EXCLUDE_EXTS:
