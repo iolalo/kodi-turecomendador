@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog" id="14001">
+    <defaultcontrol>2</defaultcontrol>
+    <controls>
+
+        <!-- Title -->
+        <control type="label" id="1">
+            <left>80</left><top>68</top>
+            <width>1100</width><height>44</height>
+            <font>font20</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>ESTADÍSTICAS</label>
+        </control>
+
+        <!-- Close button -->
+        <control type="button" id="2">
+            <left>1160</left><top>64</top>
+            <width>60</width><height>40</height>
+            <font>font16</font>
+            <label>✕</label>
+            <textcolor>FF888888</textcolor>
+            <focusedcolor>FFFF5555</focusedcolor>
+            <texturefocus></texturefocus>
+            <texturenofocus></texturenofocus>
+        </control>
+
+        <!-- ============================================================ -->
+        <!-- LEFT COLUMN — numerical stats                                 -->
+        <!-- ============================================================ -->
+
+        <!-- PELÍCULAS header -->
+        <control type="label">
+            <left>80</left><top>132</top>
+            <width>500</width><height>26</height>
+            <font>font13</font>
+            <textcolor>FF4A90D9</textcolor>
+            <label>[ PELÍCULAS ]</label>
+        </control>
+
+        <!-- big movie count -->
+        <control type="label" id="100">
+            <left>80</left><top>162</top>
+            <width>220</width><height>50</height>
+            <font>font24</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>—</label>
+        </control>
+
+        <!-- sub-label 1 (e.g. "películas únicas") -->
+        <control type="label" id="101">
+            <left>80</left><top>216</top>
+            <width>500</width><height>22</height>
+            <font>font12</font>
+            <textcolor>FF777777</textcolor>
+            <label></label>
+        </control>
+
+        <!-- sub-label 2 (e.g. "reproductions + time") -->
+        <control type="label" id="102">
+            <left>80</left><top>240</top>
+            <width>500</width><height>22</height>
+            <font>font12</font>
+            <textcolor>FFAAAAAA</textcolor>
+            <label></label>
+        </control>
+
+        <!-- SERIES header -->
+        <control type="label">
+            <left>80</left><top>280</top>
+            <width>500</width><height>26</height>
+            <font>font13</font>
+            <textcolor>FFFF9900</textcolor>
+            <label>[ SERIES ]</label>
+        </control>
+
+        <!-- big shows count -->
+        <control type="label" id="200">
+            <left>80</left><top>310</top>
+            <width>220</width><height>50</height>
+            <font>font24</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>—</label>
+        </control>
+
+        <control type="label" id="201">
+            <left>80</left><top>364</top>
+            <width>500</width><height>22</height>
+            <font>font12</font>
+            <textcolor>FF777777</textcolor>
+            <label></label>
+        </control>
+
+        <control type="label" id="202">
+            <left>80</left><top>388</top>
+            <width>500</width><height>22</height>
+            <font>font12</font>
+            <textcolor>FFAAAAAA</textcolor>
+            <label></label>
+        </control>
+
+        <control type="label" id="203">
+            <left>80</left><top>412</top>
+            <width>500</width><height>22</height>
+            <font>font12</font>
+            <textcolor>FFAAAAAA</textcolor>
+            <label></label>
+        </control>
+
+        <!-- TIEMPO TOTAL header -->
+        <control type="label">
+            <left>80</left><top>452</top>
+            <width>500</width><height>26</height>
+            <font>font13</font>
+            <textcolor>FF44CC88</textcolor>
+            <label>[ TIEMPO TOTAL ]</label>
+        </control>
+
+        <!-- big total time -->
+        <control type="label" id="300">
+            <left>80</left><top>482</top>
+            <width>500</width><height>50</height>
+            <font>font24</font>
+            <textcolor>FFFFFFFF</textcolor>
+            <label>—</label>
+        </control>
+
+        <control type="label" id="301">
+            <left>80</left><top>536</top>
+            <width>500</width><height>22</height>
+            <font>font12</font>
+            <textcolor>FF777777</textcolor>
+            <label></label>
+        </control>
+
+        <!-- ============================================================ -->
+        <!-- RIGHT COLUMN — genre bars + directors                         -->
+        <!-- ============================================================ -->
+
+        <!-- GÉNEROS / RATINGS header -->
+        <control type="label" id="390">
+            <left>640</left><top>132</top>
+            <width>580</width><height>26</height>
+            <font>font13</font>
+            <textcolor>FFCC66FF</textcolor>
+            <label>[ GÉNEROS ]</label>
+        </control>
+
+        <!-- Genre/Rating row 1 -->
+        <control type="label" id="400">
+            <left>640</left><top>166</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="401">
+            <left>790</left><top>166</top>
+            <width>220</width><height>22</height>
+            <font>font12</font><textcolor>FFCC66FF</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="402">
+            <left>1020</left><top>166</top>
+            <width>80</width><height>22</height>
+            <font>font12</font><textcolor>FF888888</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Genre/Rating row 2 -->
+        <control type="label" id="410">
+            <left>640</left><top>193</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="411">
+            <left>790</left><top>193</top>
+            <width>220</width><height>22</height>
+            <font>font12</font><textcolor>FFCC66FF</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="412">
+            <left>1020</left><top>193</top>
+            <width>80</width><height>22</height>
+            <font>font12</font><textcolor>FF888888</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Genre/Rating row 3 -->
+        <control type="label" id="420">
+            <left>640</left><top>220</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="421">
+            <left>790</left><top>220</top>
+            <width>220</width><height>22</height>
+            <font>font12</font><textcolor>FFCC66FF</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="422">
+            <left>1020</left><top>220</top>
+            <width>80</width><height>22</height>
+            <font>font12</font><textcolor>FF888888</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Genre/Rating row 4 -->
+        <control type="label" id="430">
+            <left>640</left><top>247</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="431">
+            <left>790</left><top>247</top>
+            <width>220</width><height>22</height>
+            <font>font12</font><textcolor>FFCC66FF</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="432">
+            <left>1020</left><top>247</top>
+            <width>80</width><height>22</height>
+            <font>font12</font><textcolor>FF888888</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Genre/Rating row 5 -->
+        <control type="label" id="440">
+            <left>640</left><top>274</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="441">
+            <left>790</left><top>274</top>
+            <width>220</width><height>22</height>
+            <font>font12</font><textcolor>FFCC66FF</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="442">
+            <left>1020</left><top>274</top>
+            <width>80</width><height>22</height>
+            <font>font12</font><textcolor>FF888888</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- TOP DIRECTORES header -->
+        <control type="label" id="490">
+            <left>640</left><top>318</top>
+            <width>580</width><height>26</height>
+            <font>font13</font>
+            <textcolor>FFFF6666</textcolor>
+            <label>[ TOP DIRECTORES ]</label>
+        </control>
+
+        <!-- Director row 1 -->
+        <control type="label" id="500">
+            <left>640</left><top>350</top>
+            <width>310</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="501">
+            <left>960</left><top>350</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFFF6666</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Director row 2 -->
+        <control type="label" id="510">
+            <left>640</left><top>376</top>
+            <width>310</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="511">
+            <left>960</left><top>376</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFFF6666</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Director row 3 -->
+        <control type="label" id="520">
+            <left>640</left><top>402</top>
+            <width>310</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="521">
+            <left>960</left><top>402</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFFF6666</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Director row 4 -->
+        <control type="label" id="530">
+            <left>640</left><top>428</top>
+            <width>310</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="531">
+            <left>960</left><top>428</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFFF6666</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Director row 5 -->
+        <control type="label" id="540">
+            <left>640</left><top>454</top>
+            <width>310</width><height>22</height>
+            <font>font12</font><textcolor>FFDDDDDD</textcolor>
+            <label></label>
+        </control>
+        <control type="label" id="541">
+            <left>960</left><top>454</top>
+            <width>140</width><height>22</height>
+            <font>font12</font><textcolor>FFFF6666</textcolor>
+            <align>right</align>
+            <label></label>
+        </control>
+
+        <!-- Storytelling narrative (full-width, bottom of screen) -->
+        <control type="label" id="700">
+            <left>80</left><top>590</top>
+            <width>1140</width><height>80</height>
+            <font>font13</font>
+            <textcolor>FF888888</textcolor>
+            <wrapmultiline>true</wrapmultiline>
+            <label></label>
+        </control>
+
+        <!-- Ratings distribution section (all-time only) -->
+        <control type="label" id="600">
+            <left>640</left><top>496</top>
+            <width>580</width><height>26</height>
+            <font>font13</font><textcolor>FFDDCC44</textcolor>
+            <label></label>
+        </control>
+
+        <control type="label" id="601">
+            <left>640</left><top>526</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="602">
+            <left>640</left><top>548</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="603">
+            <left>640</left><top>570</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="604">
+            <left>640</left><top>592</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="605">
+            <left>640</left><top>614</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="606">
+            <left>640</left><top>636</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="607">
+            <left>640</left><top>658</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="608">
+            <left>640</left><top>680</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="609">
+            <left>640</left><top>702</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+        <control type="label" id="610">
+            <left>640</left><top>724</top><width>580</width><height>20</height>
+            <font>font12</font><textcolor>FFDDCC44</textcolor><label></label>
+        </control>
+
+    </controls>
+</window>

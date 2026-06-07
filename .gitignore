@@ -1,0 +1,13 @@
+dist/
+__pycache__/
+*.pyc
+*.pyo
+*.json
+*.zip
+.DS_Store
+
+# scripts de desarrollo local
+sync_subtitles_from_pi.*
+apply_subtitles_config.*
+DEEPSEEK_AUDIT_PROMPT.md
+make_zip.py
