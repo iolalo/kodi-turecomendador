@@ -16,6 +16,15 @@ from datetime import datetime
 KODI_HOME = Path(os.environ["APPDATA"]) / "Kodi"
 OUTPUT = Path("kodi-build.zip")
 
+# Addons con binarios nativos x86/x64 que no corren en ARM (LibreELEC/Raspberry Pi)
+# El usuario los instala desde su repo oficial directamente en el dispositivo destino
+EXCLUDE_ADDONS = {
+    "plugin.video.elementum",    # binario nativo: elementum.exe / elementum (arm)
+    "script.elementum.burst",    # depende de elementum
+    "repository.elementumorg",   # repo de elementum
+    "vfs.libarchive",            # binario nativo dependiente de plataforma
+}
+
 # Carpetas que no tienen sentido copiar
 EXCLUDE_DIRS = {
     "packages",       # cache de zips descargados
@@ -43,6 +52,9 @@ def should_exclude(rel: str) -> bool:
     for part in parts:
         if part in EXCLUDE_DIRS:
             return True
+    # Excluir addons con binarios nativos platform-específicos
+    if parts[0] == "addons" and len(parts) > 1 and parts[1] in EXCLUDE_ADDONS:
+        return True
     if rel in EXCLUDE_FILES:
         return True
     if Path(rel).suffix in EXCLUDE_EXTS:
