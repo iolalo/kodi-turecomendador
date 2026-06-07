@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 ADDONS = [
     "plugin.video.turecomendador",
     "repository.turecomendador",
+    "script.turecomendador.wizard",
 ]
 DIST = "dist"
 EXCLUDE_EXTS = {".pyc", ".pyo"}
