@@ -54,13 +54,22 @@ def build_addons_xml() -> str:
     return xml_str
 
 
+def make_index_html(directory: str, files: list[str]) -> None:
+    links = "\n".join(f'<a href="{f}">{f}</a><br>' for f in sorted(files))
+    html = f"<!DOCTYPE html><html><body>\n{links}\n</body></html>\n"
+    with open(os.path.join(directory, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html)
+
+
 def main():
     os.makedirs(DIST, exist_ok=True)
 
     print("Generando zips...")
+    addon_zips: dict[str, str] = {}
     for addon_id in ADDONS:
         version = read_version(addon_id)
         make_zip(addon_id, version)
+        addon_zips[addon_id] = f"{addon_id}-{version}.zip"
 
     print("\nGenerando addons.xml...")
     xml_str = build_addons_xml()
@@ -73,6 +82,16 @@ def main():
         f.write(md5)
 
     print(f"  OK addons.xml  (md5: {md5})")
+
+    print("\nGenerando index.html para Kodi...")
+    # índice raíz
+    root_entries = ["addons.xml", "addons.xml.md5"] + [f"{aid}/" for aid in ADDONS]
+    make_index_html(DIST, root_entries)
+    # índice por addon
+    for addon_id, zip_name in addon_zips.items():
+        make_index_html(os.path.join(DIST, addon_id), [zip_name])
+    print("  OK index.html generados")
+
     print("\nBuild completo. Contenido de dist/:")
     for r, _, files in os.walk(DIST):
         for fname in files:
