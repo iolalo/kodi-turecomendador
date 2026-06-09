@@ -82,6 +82,10 @@ def get_movie_details(tmdb_id: int) -> dict | None:
     return _cached_get(f"movie_{tmdb_id}", f"/movie/{tmdb_id}")
 
 
+def get_show_details(tmdb_id: int) -> dict | None:
+    return _cached_get(f"tv_{tmdb_id}", f"/tv/{tmdb_id}")
+
+
 def get_movie_credits(tmdb_id: int) -> dict | None:
     return _cached_get(f"credits_{tmdb_id}", f"/movie/{tmdb_id}/credits")
 
@@ -199,6 +203,22 @@ LANG_TO_COUNTRY = {
     "pt": "BR", "es": "ES", "ru": "RU", "pl": "PL", "ro": "RO",
     "tr": "TR", "nl": "NL", "hu": "HU", "cs": "CZ", "en": "US/GB",
 }
+
+
+def enrich_show(raw: dict) -> dict:
+    return {
+        "tmdb_id": raw.get("id"),
+        "title": raw.get("name", ""),
+        "year": (raw.get("first_air_date") or "")[:4],
+        "rating": raw.get("vote_average", 0),
+        "votes": raw.get("vote_count", 0),
+        "overview": raw.get("overview", ""),
+        "poster": poster_url(raw.get("poster_path", "")),
+        "fanart": fanart_url(raw.get("backdrop_path", "")),
+        "seasons": raw.get("number_of_seasons", 0),
+        "episodes": raw.get("number_of_episodes", 0),
+        "genre_ids": [g["id"] for g in raw.get("genres", [])],
+    }
 
 
 def enrich_movie(raw: dict) -> dict:

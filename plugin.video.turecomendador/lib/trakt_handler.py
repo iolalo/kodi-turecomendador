@@ -191,6 +191,72 @@ def get_watched_tmdb_ids(token: str) -> set:
     return ids
 
 
+def get_watchlist_movies(token: str, use_cache: bool = True) -> list:
+    cache = _get_watched_cache()
+    if use_cache:
+        cached = cache.get("watchlist_movies")
+        if cached is not None:
+            return cached
+
+    r = _request_with_retry(
+        requests.get,
+        f"{BASE_URL}/users/me/watchlist/movies",
+        headers=_headers(token),
+        params={"limit": 100, "sort": "added"},
+    )
+    if not r or r.status_code != 200:
+        return []
+
+    movies = []
+    for item in r.json():
+        m = item.get("movie", {})
+        tmdb_id = m.get("ids", {}).get("tmdb")
+        if tmdb_id:
+            movies.append({
+                "title": m.get("title", ""),
+                "year": m.get("year"),
+                "tmdb_id": tmdb_id,
+                "trakt_id": m.get("ids", {}).get("trakt"),
+                "slug": m.get("ids", {}).get("slug"),
+                "listed_at": item.get("listed_at", ""),
+            })
+
+    cache.set("watchlist_movies", movies)
+    return movies
+
+
+def get_watchlist_shows(token: str, use_cache: bool = True) -> list:
+    cache = _get_watched_cache()
+    if use_cache:
+        cached = cache.get("watchlist_shows")
+        if cached is not None:
+            return cached
+
+    r = _request_with_retry(
+        requests.get,
+        f"{BASE_URL}/users/me/watchlist/shows",
+        headers=_headers(token),
+        params={"limit": 100, "sort": "added"},
+    )
+    if not r or r.status_code != 200:
+        return []
+
+    shows = []
+    for item in r.json():
+        s = item.get("show", {})
+        shows.append({
+            "title": s.get("title", ""),
+            "year": s.get("year"),
+            "tmdb_id": s.get("ids", {}).get("tmdb"),
+            "trakt_id": s.get("ids", {}).get("trakt"),
+            "slug": s.get("ids", {}).get("slug"),
+            "listed_at": item.get("listed_at", ""),
+        })
+
+    cache.set("watchlist_shows", shows)
+    return shows
+
+
 def get_mubi_list(token: str, list_slug: str = "mubi") -> list[dict]:
     cache = _get_cache()
     cache_key = f"list_{list_slug}"

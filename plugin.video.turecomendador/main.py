@@ -4,6 +4,21 @@ import os
 import threading
 from urllib.parse import urlencode, parse_qs, urlparse
 
+# Bootstrap: add module paths for addons not registered by Kodi's addon manager
+_ADDONS_DIR = '/storage/.kodi/addons'
+_MODULES = [
+    'script.module.requests', 'script.module.urllib3', 'script.module.certifi',
+    'script.module.chardet', 'script.module.idna', 'script.module.six',
+    'script.module.dateutil', 'script.module.arrow', 'script.module.trakt',
+    'script.module.simplecache', 'script.module.routing', 'script.module.future',
+    'script.module.beautifulsoup4', 'script.module.soupsieve', 'script.module.html5lib',
+    'script.module.webencodings', 'script.module.addon.signals',
+]
+for _mod in _MODULES:
+    _lib = os.path.join(_ADDONS_DIR, _mod, 'lib')
+    if os.path.isdir(_lib) and _lib not in sys.path:
+        sys.path.insert(0, _lib)
+
 import xbmc
 import xbmcgui
 import xbmcplugin
@@ -26,12 +41,12 @@ paths.set_data_dir(_profile)
 
 from lib.trakt_auth import get_valid_token, logout
 from lib.trakt_handler import (
-    get_watched_movies, get_watched_shows,
+    get_watched_movies, get_watched_shows, get_watchlist_movies, get_watchlist_shows,
     get_recent_history, get_watched_tmdb_ids,
     _get_cache, _get_watched_cache,
 )
 from lib.recommendations import get_mubi_recommendations, get_mubi_recommendations_cached, get_general_recommendations
-from lib.tmdb_handler import get_movie_details, enrich_movie
+from lib.tmdb_handler import get_movie_details, enrich_movie, get_show_details, enrich_show
 from lib.stats import (
     get_all_time_stats, compute_period_stats,
     period_month, period_year,
@@ -209,16 +224,45 @@ def _make_list_item(movie: dict) -> xbmcgui.ListItem:
     return li
 
 
-def show_movie_list(movies: list[dict]):
-    if not _elementum_available():
-        xbmcgui.Dialog().ok(
-            "Elementum no instalado",
-            "Para reproducir necesitás el addon [B]Elementum[/B].\n"
-            "Instalalo desde el repositorio de Kodi y volvé a intentar.",
-        )
+def _make_show_list_item(show: dict) -> xbmcgui.ListItem:
+    label = f"{show['title']} ({show['year']})" if show.get("year") else show["title"]
+    li = xbmcgui.ListItem(label=label)
+    li.setInfo("video", {
+        "tvshowtitle": show["title"],
+        "year": int(show["year"]) if str(show.get("year", "")).isdigit() else 0,
+        "plot": show.get("overview", ""),
+        "rating": show.get("rating", 0),
+        "mediatype": "tvshow",
+    })
+    li.setArt({
+        "thumb": show.get("poster", ""),
+        "poster": show.get("poster", ""),
+        "fanart": show.get("fanart", ""),
+    })
+    return li
+
+
+def show_show_list(shows: list[dict]):
+    xbmcplugin.setContent(HANDLE, "tvshows")
+    items = []
+    for show in shows:
+        if not show.get("tmdb_id"):
+            continue
+        li = _make_show_list_item(show)
+        items.append((build_url("shows"), li, False))
+
+    if not items:
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
         return
 
+    xbmcplugin.addDirectoryItems(HANDLE, items, len(items))
+    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_NONE)
+    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_VIDEO_RATING)
+    xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_LABEL)
+    xbmcplugin.endOfDirectory(HANDLE)
+
+
+def show_movie_list(movies: list[dict]):
     xbmcplugin.setContent(HANDLE, "movies")
     items = []
     for movie in movies:
@@ -227,6 +271,10 @@ def show_movie_list(movies: list[dict]):
             continue
         li = _make_list_item(movie)
         items.append((_elementum_url(tmdb_id), li, False))
+
+    if not items:
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
 
     xbmcplugin.addDirectoryItems(HANDLE, items, len(items))
     xbmcplugin.addSortMethod(HANDLE, xbmcplugin.SORT_METHOD_NONE)
@@ -244,6 +292,8 @@ def view_main_menu():
     sections = [
         ("MUBI — Tu perfil personal",   "mubi",    "Cine indie contemplativo calibrado a tus gustos"),
         ("Recomendaciones Trakt",        "trakt",   "Sugerencias basadas en todo tu historial"),
+        ("Seguimiento de películas",      "watchlist_movies", "Películas en tu watchlist de Trakt"),
+        ("Seguimiento de series",        "shows",   "Series en tu watchlist de Trakt con pósters"),
         ("Lo que estoy viendo",          "history", "Tu actividad reciente en Trakt"),
         ("Películas vistas",             "watched", "Tu biblioteca completa de películas"),
         ("Estadísticas",                 "stats",   "Resumen mensual, anual e histórico de lo visto"),
@@ -256,9 +306,142 @@ def view_main_menu():
     xbmcplugin.endOfDirectory(HANDLE)
 
 
+def view_watchlist_movies():
+    token = require_token()
+    if not token:
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
+    from lib.cache import CacheManager
+    monitor = xbmc.Monitor()
+    is_widget = monitor.abortRequested()
+
+    _cache = CacheManager(paths.data_path("watchlist_movies_cache.json"), ttl=3600)
+    _cached = _cache.get("movies")
+    if _cached:
+        xbmcplugin.setPluginCategory(HANDLE, "Seguimiento de películas")
+        show_movie_list(_cached[:40])
+        return
+
+    if is_widget:
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
+    def fetch(update):
+        update(10, "Descargando watchlist de Trakt...")
+        raw = get_watchlist_movies(token)
+        raw.sort(key=lambda m: m.get("listed_at", ""), reverse=True)
+        limit = min(len(raw), 40)
+        enriched = []
+        for i, m in enumerate(raw[:limit]):
+            tmdb_id = m.get("tmdb_id")
+            if not tmdb_id:
+                continue
+            details = get_movie_details(tmdb_id)
+            enriched.append(enrich_movie(details) if details else {
+                "tmdb_id": tmdb_id,
+                "title": m.get("title", ""),
+                "year": str(m.get("year", "")),
+                "rating": 0, "votes": 0, "overview": "",
+                "poster": "", "fanart": "",
+                "genre_ids": [], "origin_country": [], "original_language": "",
+            })
+            update(10 + int((i + 1) / max(limit, 1) * 90), m.get("title", ""))
+        update(100)
+        return enriched
+
+    movies, err = run_with_progress(fetch, "Cargando seguimiento de películas...", [])
+    if err:
+        notify(f"Error: {err}", icon=xbmcgui.NOTIFICATION_ERROR)
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
+    movies = movies or []
+    _cache.set("movies", movies)
+    xbmcplugin.setPluginCategory(HANDLE, "Seguimiento de películas")
+    show_movie_list(movies)
+
+
+def view_shows():
+    token = require_token()
+    if not token:
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
+    from lib.cache import CacheManager
+    monitor = xbmc.Monitor()
+    is_widget = monitor.abortRequested()
+
+    cache_ttl = 3600  # 1h — si el usuario borra del watchlist de Trakt, el cambio se refleja en ~1h o al refrescar
+    _cache = CacheManager(paths.data_path("shows_cache.json"), ttl=cache_ttl)
+    _cached = _cache.get("shows")
+    if _cached:
+        xbmcplugin.setPluginCategory(HANDLE, "Series vistas")
+        show_show_list(_cached[:40])
+        return
+
+    if is_widget:
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
+    def fetch(update):
+        update(10, "Descargando seguimiento de Trakt...")
+        raw = get_watchlist_shows(token)
+        # Most recently added first
+        raw.sort(key=lambda s: s.get("listed_at", ""), reverse=True)
+        limit = min(len(raw), 40)
+        enriched = []
+        for i, s in enumerate(raw[:limit]):
+            tmdb_id = s.get("tmdb_id")
+            if not tmdb_id:
+                continue
+            details = get_show_details(tmdb_id)
+            enriched.append(enrich_show(details) if details else {
+                "tmdb_id": tmdb_id,
+                "title": s.get("title", ""),
+                "year": str(s.get("year", "")),
+                "rating": 0, "votes": 0, "overview": "",
+                "poster": "", "fanart": "",
+                "seasons": 0, "episodes": 0, "genre_ids": [],
+            })
+            update(10 + int((i + 1) / max(limit, 1) * 90), s.get("title", ""))
+        update(100)
+        return enriched
+
+    shows, err = run_with_progress(fetch, "Cargando series vistas...", [])
+    if err:
+        notify(f"Error: {err}", icon=xbmcgui.NOTIFICATION_ERROR)
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
+    shows = shows or []
+    _cache.set("shows", shows)
+    xbmcplugin.setPluginCategory(HANDLE, "Series vistas")
+    show_show_list(shows)
+
+
 def view_mubi():
     token = require_token()
     if not token:
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
+    from lib.cache import CacheManager
+    monitor = xbmc.Monitor()
+    is_widget = monitor.abortRequested()
+
+    # Widget context: abortRequested() is True immediately from CDirectoryProvider.
+    # Use a 24h TTL so the widget keeps showing content between user-initiated refreshes.
+    cache_ttl = 86400 if is_widget else 3600
+    _cache = CacheManager(paths.data_path("mubi_cache.json"), ttl=cache_ttl)
+    _cached = _cache.get("recs")
+    if _cached:
+        xbmcplugin.setPluginCategory(HANDLE, "MUBI — Tu perfil personal")
+        show_movie_list(_cached[:40])
+        return
+
+    if is_widget:
+        # No cache and can't block on API in widget context — fail gracefully.
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
         return
 
@@ -290,6 +473,21 @@ def view_trakt():
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
         return
 
+    from lib.cache import CacheManager
+    monitor = xbmc.Monitor()
+    is_widget = monitor.abortRequested()
+
+    _cache = CacheManager(paths.data_path("trakt_recs_cache.json"), ttl=86400 if is_widget else 3600)
+    _cached = _cache.get("recs")
+    if _cached:
+        xbmcplugin.setPluginCategory(HANDLE, "Recomendaciones Trakt")
+        show_movie_list(_cached[:40])
+        return
+
+    if is_widget:
+        xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
+        return
+
     def fetch(update):
         update(20, "Consultando Trakt...")
         watched = get_watched_tmdb_ids(token)
@@ -304,8 +502,10 @@ def view_trakt():
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
         return
 
+    movies = movies or []
+    _cache.set("recs", movies)
     xbmcplugin.setPluginCategory(HANDLE, "Recomendaciones Trakt")
-    show_movie_list(movies or [])
+    show_movie_list(movies)
 
 
 def view_history():
@@ -502,7 +702,11 @@ def view_stats_all():
 def view_refresh():
     _get_cache().clear()
     _get_watched_cache().clear()
-    notify("Caché limpiado. Historial y recomendaciones se recargarán.")
+    # También limpia los caches de watchlist para reflejar cambios en Trakt
+    from lib.cache import CacheManager
+    CacheManager(paths.data_path("shows_cache.json"), ttl=0).clear()
+    CacheManager(paths.data_path("watchlist_movies_cache.json"), ttl=0).clear()
+    notify("Caché limpiado. Seguimientos, recomendaciones e historial se recargarán.")
     xbmcplugin.endOfDirectory(HANDLE)
 
 
@@ -518,6 +722,8 @@ def router():
         None:           view_main_menu,
         "mubi":         view_mubi,
         "trakt":        view_trakt,
+        "watchlist_movies": view_watchlist_movies,
+        "shows":        view_shows,
         "history":      view_history,
         "watched":      view_watched,
         "stats":        view_stats,

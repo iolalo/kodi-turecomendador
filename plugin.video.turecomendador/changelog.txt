@@ -1,3 +1,14 @@
+v0.5.0 (2026-06-08)
+- feat: Spotlight de seguimiento de series (watchlist Trakt) en home screen
+- feat: Spotlight de seguimiento de películas (watchlist Trakt) en home screen
+- feat: "Seguimiento de series" y "Seguimiento de películas" en menú del addon
+- feat: IP estática en Pi 400 (ConnMan manual 192.168.0.203)
+- fix: skin key "tvshows" corregida — skinshortcuts traduce label 20343 a "tvshows"
+- fix: skin key "seguimientomovies-trakt" calculada por slugify del label
+- fix: caché de watchlist reducido a 1h (antes 24h) para reflejar cambios de Trakt
+- fix: Refrescar caché ahora limpia también shows y watchlist_movies
+- scripts: build_addon_zips.py, sync_addons_to_pi.py, sync_addon_data_to_pi.py, pi_register_addons.py
+
 v0.4.2 (2026-06-07)
 - Fix: trakt_token.json corrupto ya no crashea el addon (try/except + auto-borrado)
 - Fix: caché en memoria de TMDB limitado a 200 entradas (LRU) para no agotar RAM en ARM
