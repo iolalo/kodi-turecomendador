@@ -10,7 +10,7 @@ except ImportError:
 _MUBI_CACHE_TTL = 3600  # 1 hora
 
 from lib.tmdb_handler import (
-    search_person, get_movies_by_director,
+    search_person, search_movie, get_movies_by_director,
     discover_indie, discover_by_keywords,
     get_similar, enrich_movie,
 )
@@ -29,7 +29,8 @@ MUBI_KEYWORD_IDS = [
     4344,    # introspective
 ]
 
-REFERENCE_MOVIES = {
+# IDs conocidos — evitan búsqueda en TMDB para películas pre-resueltas
+_KNOWN_IDS: dict[str, int] = {
     "Train Dreams":                   1197306,
     "Petite Maman":                   813276,
     "A Real Pain":                    1214314,
@@ -37,6 +38,44 @@ REFERENCE_MOVIES = {
     "Fallen Leaves":                  897087,
     "The Worst Person in the World":  618355,
 }
+
+
+def _load_reference_titles() -> list[str]:
+    import os
+    # Primero busca en Downloads (\\192.168.0.203\Downloads\ desde Windows, smb://Pi/Downloads desde Android)
+    downloads = "/storage/downloads/reference_movies.txt"
+    if os.path.exists(downloads):
+        fpath = downloads
+    else:
+        # Fallback: archivo bundled con el addon
+        try:
+            import xbmcvfs
+            import xbmcaddon
+            addon_path = xbmcvfs.translatePath(xbmcaddon.Addon().getAddonInfo("path"))
+            fpath = os.path.join(addon_path, "resources", "reference_movies.txt")
+        except ImportError:
+            fpath = os.path.join(os.path.dirname(__file__), "..", "resources", "reference_movies.txt")
+    try:
+        with open(fpath, encoding="utf-8") as f:
+            return [l.strip() for l in f if l.strip() and not l.strip().startswith("#")]
+    except OSError:
+        return list(_KNOWN_IDS.keys())
+
+
+def _resolve_reference_ids() -> dict[str, int]:
+    import re
+    result = {}
+    for title in _load_reference_titles():
+        clean = re.sub(r'\s*\(\d{4}\)\s*$', '', title).strip()
+        if clean in _KNOWN_IDS:
+            result[title] = _KNOWN_IDS[clean]
+        else:
+            tmdb_id = search_movie(title)
+            if tmdb_id:
+                result[title] = tmdb_id
+            else:
+                _log(f"reference_movies.txt: no encontrado en TMDB: '{title}'")
+    return result
 
 
 def _resolve_director_ids() -> dict[str, int]:
@@ -119,8 +158,8 @@ def get_mubi_recommendations(
     except Exception as e:
         _log(f"Keywords: {e}")
 
-    # 4. Similares a referencias estáticas
-    for title, tmdb_id in REFERENCE_MOVIES.items():
+    # 4. Similares a referencias (hardcoded + reference_movies.txt)
+    for title, tmdb_id in _resolve_reference_ids().items():
         try:
             all_raw.extend(get_similar(tmdb_id))
         except Exception as e:

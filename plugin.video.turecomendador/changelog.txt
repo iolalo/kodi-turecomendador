@@ -1,3 +1,11 @@
+v0.6.0 (2026-06-14)
+- feat: Play desde home screen / spotlight — ruteado via action=play + setResolvedUrl (fix widget)
+- feat: Puntuar película en Trakt (1-10) desde menú contextual en cualquier lista
+- feat: Subtítulos automáticos en español al reproducir (SubtitleSearch post-inicio)
+- fix: Series en watchlist ahora abren en TMDB Helper por temporadas/episodios (URL era incorrecta)
+- fix: Spotlight por segmento — items 1/3/4 apuntan ahora al addon propio (no Elementum)
+- nueva setting: "Buscar subtítulos en español al reproducir" (activada por defecto)
+
 v0.5.0 (2026-06-08)
 - feat: Spotlight de seguimiento de series (watchlist Trakt) en home screen
 - feat: Spotlight de seguimiento de películas (watchlist Trakt) en home screen

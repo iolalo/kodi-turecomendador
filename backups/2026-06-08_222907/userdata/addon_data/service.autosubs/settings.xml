@@ -1,0 +1,20 @@
+<settings version="2">
+    <setting id="debug" default="true">false</setting>
+    <setting id="check_for_specific">true</setting>
+    <setting id="selected_language">Spanish</setting>
+    <setting id="ExcludeTime" default="true">15</setting>
+    <setting id="ignore_words" default="true">&quot;theme&quot;</setting>
+    <setting id="ExcludeLiveTV" default="true">false</setting>
+    <setting id="ExcludeHTTP" default="true">false</setting>
+    <setting id="ExcludeVideoClip" default="true">false</setting>
+    <setting id="ExcludePathOption" default="true">false</setting>
+    <setting id="ExcludePath" default="true" />
+    <setting id="ExcludePathOption2" default="true">false</setting>
+    <setting id="ExcludePath2" default="true" />
+    <setting id="ExcludePathOption3" default="true">false</setting>
+    <setting id="ExcludePath3" default="true" />
+    <setting id="ExcludePathOption4" default="true">false</setting>
+    <setting id="ExcludePath4" default="true" />
+    <setting id="ExcludePathOption5" default="true">false</setting>
+    <setting id="ExcludePath5" default="true" />
+</settings>

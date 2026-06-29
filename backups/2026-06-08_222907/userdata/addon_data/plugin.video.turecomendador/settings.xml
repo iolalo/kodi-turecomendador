@@ -1,0 +1,11 @@
+<settings version="2">
+    <setting id="trakt_client_id">f98a536dde93694d4f00ba9977f126e7edadf43dd3c4327b3b686cc5e8562621</setting>
+    <setting id="trakt_client_secret">6b3c38daba095ae77b481bbbdb619abc0241a5e45a8372190196a6e77cec1d23</setting>
+    <setting id="trakt_username">iolalo</setting>
+    <setting id="trakt_logout" default="true" />
+    <setting id="tmdb_api_key">69331460ad21dc8ea83da49c39c2167f</setting>
+    <setting id="mubi_limit">40</setting>
+    <setting id="trakt_limit">40</setting>
+    <setting id="mubi_list_slug" default="true">mubi</setting>
+    <setting id="min_rating">8</setting>
+</settings>

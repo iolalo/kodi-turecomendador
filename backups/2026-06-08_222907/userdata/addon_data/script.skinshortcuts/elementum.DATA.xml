@@ -1,0 +1,23 @@
+<shortcuts>
+	<shortcut>
+		<label>Películas</label>
+		<label2></label2>
+		<icon>DefaultMovies.png</icon>
+		<thumb />
+		<action>ActivateWindow(10025,plugin://plugin.video.elementum/movies/,return)</action>
+	</shortcut>
+	<shortcut>
+		<label>Series</label>
+		<label2></label2>
+		<icon>DefaultTVShows.png</icon>
+		<thumb />
+		<action>ActivateWindow(10025,plugin://plugin.video.elementum/shows/,return)</action>
+	</shortcut>
+	<shortcut>
+		<label>Buscar</label>
+		<label2></label2>
+		<icon>DefaultAddonSearch.png</icon>
+		<thumb />
+		<action>ActivateWindow(10025,plugin://plugin.video.elementum/search,return)</action>
+	</shortcut>
+</shortcuts>

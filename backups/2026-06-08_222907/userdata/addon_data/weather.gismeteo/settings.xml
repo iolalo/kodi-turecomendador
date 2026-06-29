@@ -1,0 +1,21 @@
+<settings version="2">
+    <setting id="CurrentLocation">true</setting>
+    <setting id="Location1">Bella Vista</setting>
+    <setting id="Location2">Muniz</setting>
+    <setting id="Location3">Los Polvorines</setting>
+    <setting id="Location4" default="true" />
+    <setting id="Location5" default="true" />
+    <setting id="Location1ID">319563</setting>
+    <setting id="Location2ID">319564</setting>
+    <setting id="Location3ID">319457</setting>
+    <setting id="Location4ID" default="true" />
+    <setting id="Location5ID" default="true" />
+    <setting id="Language" default="true">0</setting>
+    <setting id="Weekend" default="true">0</setting>
+    <setting id="TimeZone" default="true">0</setting>
+    <setting id="PresUnit" default="true">0</setting>
+    <setting id="PrecipUnit" default="true">0</setting>
+    <setting id="UseProviderIcons" default="true">false</setting>
+    <setting id="label3" default="true" />
+    <setting id="label1" default="true" />
+</settings>

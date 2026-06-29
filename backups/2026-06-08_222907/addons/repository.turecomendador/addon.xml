@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.turecomendador"
+       name="Mi Recomendador Personal Repo"
+       version="1.0.2"
+       provider-name="iolalo">
+
+  <extension point="xbmc.addon.repository" name="Mi Recomendador Personal">
+    <dir minversion="21.0.0">
+      <info compressed="false">https://iolalo.github.io/kodi-turecomendador/addons.xml</info>
+      <checksum algo="md5">https://iolalo.github.io/kodi-turecomendador/addons.xml.md5</checksum>
+      <datadir zip="true">https://iolalo.github.io/kodi-turecomendador/</datadir>
+    </dir>
+  </extension>
+
+  <extension point="xbmc.addon.metadata">
+    <summary lang="es_ES">Repositorio del Recomendador Personal</summary>
+    <description lang="es_ES">Repositorio privado con el addon Mi Recomendador Personal.</description>
+    <platform>all</platform>
+  </extension>
+
+</addon>

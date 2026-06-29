@@ -1,0 +1,43 @@
+v0.4.2 (2026-06-07)
+- Fix: trakt_token.json corrupto ya no crashea el addon (try/except + auto-borrado)
+- Fix: caché en memoria de TMDB limitado a 200 entradas (LRU) para no agotar RAM en ARM
+- Fix: stats_window detecta resolución de pantalla para elegir 720p o 1080p
+- Fix: wizard apunta a tag fijo build-20260607 en vez de releases/latest (evitaba 404)
+
+v0.4.1 (2026-06-07)
+- Fix: dependencia de Elementum marcada como opcional para permitir instalación sin él
+
+v0.4.0 (2026-06-07)
+- Ventana de Estadísticas personalizada (WindowXML) con barras Unicode
+  • Dos columnas: métricas numéricas + top géneros / ranking directores
+  • Modo Histórico: distribución de ratings con barras doradas
+  • Sin dependencias de imagen (barras 100% con caracteres █░)
+- Segmento "Estadisticas" en el home screen (mainmenu.DATA.xml)
+  • Widget spotlight con tres modos: Este mes / Este año / Histórico
+- Fix spotlight Recomendaciones: apunta al addon propio en vez de Elementum
+- Soporte RSS y temperatura en settings del skin
+- Refactor stats: show_stats_window() reemplaza los textviewer básicos
+
+v0.3.0 (2026-06-04)
+- Refactor de seguridad: API keys movidas a settings.xml del addon
+- CacheManager unificado (TTL por tipo: recomendaciones 15min, historial 4h)
+- Fix requests: shim de compatibilidad para LibreELEC sin requests nativo
+- Soporte skin skinshortcuts: scripts de sincronización SSH con Pi
+
+v0.2.1 (2026-06-03)
+- Soporte MUBI: perfil de usuario y preferencias de cine independiente
+- Integración DeepSeek para narrativa personalizada de recomendaciones
+- Compatibilidad LibreELEC: sin dependencias externas de sistema
+- Fix instalación por ZIP en Kodi 20+
+
+v0.2.0
+- Historial de vistas enriquecido con TMDB (poster/fanart/sinopsis)
+- Filtro anti-duplicados entre historial y recomendaciones
+- Límite historial reciente: 50 items (antes 30)
+- view_refresh() limpia ambos cachés independientemente
+
+v0.1.0
+- Versión inicial: recomendaciones basadas en historial Trakt + TMDB
+- Autenticación Trakt OAuth device flow
+- Caché local de recomendaciones y historial
+- Integración básica con Elementum para reproducción

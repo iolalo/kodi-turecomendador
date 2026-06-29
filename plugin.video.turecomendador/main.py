@@ -43,6 +43,7 @@ from lib.trakt_auth import get_valid_token, logout
 from lib.trakt_handler import (
     get_watched_movies, get_watched_shows, get_watchlist_movies, get_watchlist_shows,
     get_recent_history, get_watched_tmdb_ids,
+    rate_movie,
     _get_cache, _get_watched_cache,
 )
 from lib.recommendations import get_mubi_recommendations, get_mubi_recommendations_cached, get_general_recommendations
@@ -74,6 +75,89 @@ def _elementum_available() -> bool:
 
 def _elementum_url(tmdb_id: int) -> str:
     return f"plugin://plugin.video.elementum/play?tmdb={tmdb_id}&type=movie"
+
+
+def _download_spanish_subtitle(tmdb_id: int) -> str | None:
+    """Opción A: descarga el mejor subtítulo en español vía OpenSubtitles.com REST API."""
+    api_key = ADDON.getSetting("opensubtitles_api_key").strip()
+    if not api_key:
+        return None
+    try:
+        import requests as _req
+        import tempfile
+        headers = {
+            "Api-Key": api_key,
+            "Content-Type": "application/json",
+            "User-Agent": f"MiRecomendador v{ADDON.getAddonInfo('version')}",
+        }
+        r = _req.get(
+            "https://api.opensubtitles.com/api/v1/subtitles",
+            params={"tmdb_id": tmdb_id, "languages": "es", "type": "movie"},
+            headers=headers, timeout=10,
+        )
+        if r.status_code != 200:
+            return None
+        data = r.json().get("data", [])
+        if not data:
+            return None
+        file_id = data[0]["attributes"]["files"][0]["file_id"]
+
+        r2 = _req.post(
+            "https://api.opensubtitles.com/api/v1/download",
+            json={"file_id": file_id},
+            headers=headers, timeout=10,
+        )
+        if r2.status_code != 200:
+            return None
+        link = r2.json().get("link")
+        if not link:
+            return None
+
+        r3 = _req.get(link, timeout=15)
+        if r3.status_code != 200:
+            return None
+
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".srt", mode="wb")
+        tmp.write(r3.content)
+        tmp.close()
+        return tmp.name
+    except Exception as e:
+        xbmc.log(f"[turecomendador] OpenSubtitles download error: {e}", xbmc.LOGWARNING)
+        return None
+
+
+def _schedule_subtitle_search(tmdb_id: int | None = None, delay_after_start: int = 5):
+    """
+    Opción A: descarga directo vía OpenSubtitles.com si hay API key.
+    Opción B (fallback): dispara SubtitleSearch — a4ksubtitles con auto_download=true
+                         baja solo sin mostrar diálogo.
+    """
+    import threading
+
+    def _worker():
+        player = xbmc.Player()
+        monitor = xbmc.Monitor()
+        for _ in range(30):
+            if player.isPlaying():
+                break
+            if monitor.waitForAbort(1):
+                return
+        else:
+            return
+        if monitor.waitForAbort(delay_after_start):
+            return
+        if not player.isPlaying():
+            return
+
+        sub_path = _download_spanish_subtitle(tmdb_id) if tmdb_id else None
+        if sub_path:
+            player.setSubtitles(sub_path)
+            player.showSubtitles(True)
+            xbmc.log(f"[turecomendador] Subtítulo ES cargado: {sub_path}", xbmc.LOGINFO)
+        else:
+            xbmc.executebuiltin("SubtitleSearch")
+
+    threading.Thread(target=_worker, daemon=True).start()
 
 
 def run_with_progress(fn, title: str, steps: list[str]) -> tuple:
@@ -221,6 +305,10 @@ def _make_list_item(movie: dict) -> xbmcgui.ListItem:
         "fanart": movie.get("fanart", ""),
     })
     li.setProperty("IsPlayable", "true")
+    tmdb_id = movie.get("tmdb_id")
+    if tmdb_id:
+        rate_url = build_url("rate_movie", tmdb_id=tmdb_id)
+        li.addContextMenuItems([("Puntuar en Trakt", f"RunPlugin({rate_url})")])
     return li
 
 
@@ -246,10 +334,16 @@ def show_show_list(shows: list[dict]):
     xbmcplugin.setContent(HANDLE, "tvshows")
     items = []
     for show in shows:
-        if not show.get("tmdb_id"):
+        tmdb_id = show.get("tmdb_id")
+        if not tmdb_id:
             continue
         li = _make_show_list_item(show)
-        items.append((build_url("shows"), li, False))
+        # TMDB Helper para navegación por temporadas/episodios
+        show_url = (
+            f"plugin://plugin.video.themoviedb.helper/"
+            f"?info=seasons&tmdb_id={tmdb_id}&type=tv"
+        )
+        items.append((show_url, li, True))
 
     if not items:
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
@@ -270,7 +364,9 @@ def show_movie_list(movies: list[dict]):
         if not tmdb_id:
             continue
         li = _make_list_item(movie)
-        items.append((_elementum_url(tmdb_id), li, False))
+        # Routed via nuestro play handler para que funcione desde widget/home screen
+        play_url = build_url("play", tmdb_id=tmdb_id)
+        items.append((play_url, li, False))
 
     if not items:
         xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
@@ -316,7 +412,7 @@ def view_watchlist_movies():
     monitor = xbmc.Monitor()
     is_widget = monitor.abortRequested()
 
-    _cache = CacheManager(paths.data_path("watchlist_movies_cache.json"), ttl=3600)
+    _cache = CacheManager(paths.data_path("watchlist_movies_cache.json"), ttl=86400 if is_widget else 3600)
     _cached = _cache.get("movies")
     if _cached:
         xbmcplugin.setPluginCategory(HANDLE, "Seguimiento de películas")
@@ -372,7 +468,7 @@ def view_shows():
     monitor = xbmc.Monitor()
     is_widget = monitor.abortRequested()
 
-    cache_ttl = 3600  # 1h — si el usuario borra del watchlist de Trakt, el cambio se refleja en ~1h o al refrescar
+    cache_ttl = 86400 if is_widget else 3600
     _cache = CacheManager(paths.data_path("shows_cache.json"), ttl=cache_ttl)
     _cached = _cache.get("shows")
     if _cached:
@@ -699,6 +795,47 @@ def view_stats_all():
     xbmcplugin.endOfDirectory(HANDLE, succeeded=False)
 
 
+def view_play():
+    """Resuelve el play de una película vía Elementum. Funciona desde widget y desde el addon."""
+    params = parse_qs(urlparse(sys.argv[2]).query)
+    tmdb_id_str = params.get("tmdb_id", [""])[0]
+    if not tmdb_id_str:
+        xbmcplugin.setResolvedUrl(HANDLE, False, xbmcgui.ListItem())
+        return
+    tmdb_id = int(tmdb_id_str)
+    elementum_url = _elementum_url(tmdb_id)
+    li = xbmcgui.ListItem(path=elementum_url)
+    li.setProperty("IsPlayable", "true")
+    xbmcplugin.setResolvedUrl(HANDLE, True, li)
+    if ADDON.getSettingBool("auto_subtitles"):
+        _schedule_subtitle_search(tmdb_id=tmdb_id)
+
+
+def view_rate_movie():
+    """Menú de puntuación 1-10 para una película, guarda en Trakt."""
+    params = parse_qs(urlparse(sys.argv[2]).query)
+    tmdb_id_str = params.get("tmdb_id", [""])[0]
+    if not tmdb_id_str:
+        return
+    tmdb_id = int(tmdb_id_str)
+
+    token = require_token()
+    if not token:
+        return
+
+    options = [f"{i}/10  {'★' * i}{'☆' * (10 - i)}" for i in range(1, 11)]
+    idx = xbmcgui.Dialog().select("Puntuar en Trakt", options)
+    if idx == -1:
+        return
+    rating = idx + 1
+
+    ok = rate_movie(token, tmdb_id, rating)
+    if ok:
+        notify(f"Puntuación {rating}/10 guardada en Trakt ✓")
+    else:
+        notify("Error al guardar la puntuación", icon=xbmcgui.NOTIFICATION_ERROR)
+
+
 def view_refresh():
     _get_cache().clear()
     _get_watched_cache().clear()
@@ -719,20 +856,22 @@ def router():
     action = params.get("action", [None])[0]
 
     routes = {
-        None:           view_main_menu,
-        "mubi":         view_mubi,
-        "trakt":        view_trakt,
+        None:               view_main_menu,
+        "play":             view_play,
+        "rate_movie":       view_rate_movie,
+        "mubi":             view_mubi,
+        "trakt":            view_trakt,
         "watchlist_movies": view_watchlist_movies,
-        "shows":        view_shows,
-        "history":      view_history,
-        "watched":      view_watched,
-        "stats":        view_stats,
-        "stats_widget": view_stats_widget,
-        "stats_month":  view_stats_month,
-        "stats_year":   view_stats_year,
-        "stats_all":    view_stats_all,
-        "refresh":      view_refresh,
-        "logout":       lambda: (logout(), notify("Sesión de Trakt cerrada")),
+        "shows":            view_shows,
+        "history":          view_history,
+        "watched":          view_watched,
+        "stats":            view_stats,
+        "stats_widget":     view_stats_widget,
+        "stats_month":      view_stats_month,
+        "stats_year":       view_stats_year,
+        "stats_all":        view_stats_all,
+        "refresh":          view_refresh,
+        "logout":           lambda: (logout(), notify("Sesión de Trakt cerrada")),
     }
 
     handler = routes.get(action)

@@ -105,6 +105,21 @@ def search_person(name: str) -> int | None:
     return None
 
 
+def search_movie(title: str) -> int | None:
+    import re
+    params = {"language": "en-US"}
+    m = re.match(r'^(.+?)\s*\((\d{4})\)\s*$', title)
+    if m:
+        params["query"] = m.group(1).strip()
+        params["primary_release_year"] = m.group(2)
+    else:
+        params["query"] = title
+    data = _get("/search/movie", params)
+    if data and data.get("results"):
+        return data["results"][0]["id"]
+    return None
+
+
 def get_movies_by_director(
     person_id: int,
     pages: int = 2,

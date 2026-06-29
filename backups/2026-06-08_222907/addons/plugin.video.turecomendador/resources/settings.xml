@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+  <category label="Trakt">
+    <setting id="trakt_client_id"     type="text"   label="Client ID"         default=""/>
+    <setting id="trakt_client_secret" type="text"   label="Client Secret"     default="" option="hidden"/>
+    <setting id="trakt_username"      type="text"   label="Usuario Trakt"     default=""/>
+    <setting id="trakt_logout"        type="action" label="Cerrar sesión"
+              action="RunPlugin(plugin://plugin.video.turecomendador/?action=logout)"/>
+  </category>
+  <category label="TMDB">
+    <setting id="tmdb_api_key" type="text" label="API Key" default="" option="hidden"/>
+  </category>
+  <category label="Recomendaciones">
+    <setting id="mubi_limit"       type="slider" label="Cantidad MUBI"         default="40" range="10,10,80"/>
+    <setting id="trakt_limit"      type="slider" label="Cantidad Trakt"        default="40" range="10,10,80"/>
+    <setting id="mubi_list_slug"   type="text"   label="Nombre lista Trakt"   default="mubi"/>
+    <setting id="min_rating"       type="slider" label="Rating mínimo (Opción C)" default="8" range="6,1,10"/>
+  </category>
+</settings>

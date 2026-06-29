@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rssfeeds>
+  <!--RSS feeds. To have multiple feeds, just add a feed to the set. You can also have multiple sets.-->
+  <!--To use different sets in your skin, each must be called from skin with a unique id.-->
+  <set id="1">
+    <feed updateinterval="30">https://www.xataka.com.ar/rss.xml</feed>
+    <feed updateinterval="30">https://www.xataka.com/tag/tecnologia/rss.xml</feed>
+    <feed updateinterval="30">https://es.wired.com/info/rss-feeds</feed>
+    <feed updateinterval="30">https://www.ambito.com/rss.xml</feed>
+    <feed updateinterval="30">https://www.clarin.com/rss</feed>
+  </set>
+</rssfeeds>

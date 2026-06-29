@@ -306,3 +306,20 @@ def get_highly_rated_movies(token: str, min_rating: int = 8) -> list[dict]:
     movies.sort(key=lambda x: x["rating"], reverse=True)
     cache.set(cache_key, movies)
     return movies
+
+
+def rate_movie(token: str, tmdb_id: int, rating: int) -> bool:
+    """Envía una puntuación (1-10) para una película a Trakt."""
+    payload = {
+        "movies": [{
+            "rating": rating,
+            "ids": {"tmdb": tmdb_id},
+        }]
+    }
+    r = _request_with_retry(
+        requests.post,
+        f"{BASE_URL}/sync/ratings",
+        headers=_headers(token),
+        json=payload,
+    )
+    return r is not None and r.status_code in (200, 201)

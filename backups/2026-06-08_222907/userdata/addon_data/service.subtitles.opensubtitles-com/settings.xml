@@ -1,0 +1,10 @@
+<settings version="2">
+    <setting id="OSuser">iolaloperez</setting>
+    <setting id="OSpass">!-wvcnYv2$rN,9Z</setting>
+    <setting id="APIKey" default="true">qo2wQs1PXwIHJsXvIiWXu1ZbVjaboPh6</setting>
+    <setting id="hearing_impaired" default="true">exclude</setting>
+    <setting id="foreign_parts_only" default="true">include</setting>
+    <setting id="machine_translated" default="true">exclude</setting>
+    <setting id="ai_translated" default="true">include</setting>
+    <setting id="search_cache_duration" default="true">5</setting>
+</settings>

@@ -16,4 +16,8 @@
     <setting id="mubi_list_slug"   type="text"   label="Nombre lista Trakt"   default="mubi"/>
     <setting id="min_rating"       type="slider" label="Rating mínimo (Opción C)" default="8" range="6,1,10"/>
   </category>
+  <category label="Subtítulos">
+    <setting id="auto_subtitles" type="bool" label="Buscar subtítulos en español al reproducir" default="true"/>
+    <setting id="opensubtitles_api_key" type="text" label="OpenSubtitles.com API Key (opensubtitles.com/es/consumers)" default="" option="hidden"/>
+  </category>
 </settings>

@@ -1,0 +1,30 @@
+<shortcuts>
+	<shortcut>
+		<label>MUBI — Tu perfil personal</label>
+		<label2></label2>
+		<icon>DefaultAddonVideo.png</icon>
+		<thumb />
+		<action>ActivateWindow(10025,plugin://plugin.video.turecomendador/?action=mubi,return)</action>
+	</shortcut>
+	<shortcut>
+		<label>Recomendaciones Trakt</label>
+		<label2></label2>
+		<icon>DefaultAddonVideo.png</icon>
+		<thumb />
+		<action>ActivateWindow(10025,plugin://plugin.video.turecomendador/?action=trakt,return)</action>
+	</shortcut>
+	<shortcut>
+		<label>Lo que estoy viendo</label>
+		<label2></label2>
+		<icon>DefaultAddonVideo.png</icon>
+		<thumb />
+		<action>ActivateWindow(10025,plugin://plugin.video.turecomendador/?action=history,return)</action>
+	</shortcut>
+	<shortcut>
+		<label>Películas vistas</label>
+		<label2></label2>
+		<icon>DefaultAddonVideo.png</icon>
+		<thumb />
+		<action>ActivateWindow(10025,plugin://plugin.video.turecomendador/?action=watched,return)</action>
+	</shortcut>
+</shortcuts>
